@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web UI</title>
+    <link rel="stylesheet" href="${styleUri}">
+    <script defer src="${scriptUri}"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple VS Code Extension Web UI</h1>
+        <div class="counter">Count: <span id="counter">0</span></div>
+        <div>
+            <button id="increment">Increments</button>
+            <button id="decrement">Decrements</button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="message-input" placeholder="Enter a message">
+            <button id="send-message">Send Message to VS Code</button>
+        </div>
+    </div>
+</body>
+</html>
