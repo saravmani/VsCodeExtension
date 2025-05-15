@@ -59,3 +59,42 @@ button:disabled, .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* AG Grid customizations for VS Code */
+.ag-theme-alpine-dark {
+    --ag-background-color: var(--vscode-editor-background);
+    --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground);
+    --ag-odd-row-background-color: var(--vscode-editor-background);
+    --ag-row-hover-color: var(--vscode-list-hoverBackground);
+    --ag-selected-row-background-color: var(--vscode-editor-selectionBackground);
+    --ag-font-family: var(--vscode-font-family);
+    --ag-font-size: 13px;
+    --ag-border-color: var(--vscode-panel-border);
+}
+
+.ag-header-cell-text {
+    color: var(--vscode-editor-foreground);
+}
+
+/* Improve button styling in grid cells */
+.ag-theme-alpine-dark .btn {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Fix grid layout and prevent overlaps */
+#grid-container {
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    padding-bottom: 1rem;
+}
+
+.ag-theme-alpine-dark .ag-root-wrapper {
+    border: 1px solid var(--vscode-panel-border);
+}
+
+/* Make sure the grid doesn't overflow */
+.ag-theme-alpine-dark .ag-body-viewport {
+    overflow-x: auto;
+}

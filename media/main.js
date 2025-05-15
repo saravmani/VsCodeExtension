@@ -31,9 +31,7 @@
             });
             document.getElementById('message-input').value = '';
         }
-    });
-    
-    // API functionality
+    });      // API functionality
     document.getElementById('fetch-data').addEventListener('click', async () => {
         try {
             document.getElementById('api-status').textContent = 'Loading...';
@@ -47,10 +45,24 @@
             posts = await response.json();
             currentPostIndex = 0;
             
+            // Display the first post in the detail view
             displayCurrentPost();
-            document.getElementById('api-status').textContent = `Loaded ${posts.length} posts`;
-            document.getElementById('fetch-data').disabled = false;
-            document.getElementById('post-navigation').style.display = 'block';
+              // Show the grid container first
+            const gridContainer = document.getElementById('grid-container');
+            gridContainer.style.display = 'block';
+            
+            // Create and display the AG Grid
+            setTimeout(() => {
+                createAgGrid(posts);
+                
+                // Update UI
+                document.getElementById('api-status').textContent = `Loaded ${posts.length} posts`;
+                document.getElementById('fetch-data').disabled = false;
+                document.getElementById('post-navigation').style.display = 'block';
+                
+                // Ensure proper scrolling
+                window.scrollTo(0, 0);
+            }, 100); // Small delay to ensure the container is visible
         } catch (error) {
             document.getElementById('api-status').textContent = `Error: ${error.message}`;
             document.getElementById('fetch-data').disabled = false;
@@ -75,8 +87,7 @@
             displayCurrentPost();
         }
     });
-    
-    // Display current post
+      // Display current post
     function displayCurrentPost() {
         if (posts.length === 0) {
             return;
@@ -90,5 +101,140 @@
         // Update button states
         document.getElementById('prev-post').disabled = currentPostIndex === 0;
         document.getElementById('next-post').disabled = currentPostIndex === posts.length - 1;
+    }
+      // Create and initialize AG Grid
+    function createAgGrid(data) {
+        // Define the columns
+        const columnDefs = [
+            { field: 'id', headerName: 'ID', sortable: true, filter: true, width: 70 },
+            { 
+                field: 'title', 
+                headerName: 'Title', 
+                sortable: true, 
+                filter: true, 
+                flex: 2,
+                tooltipField: 'title'
+            },
+            { 
+                field: 'body', 
+                headerName: 'Content', 
+                sortable: true, 
+                filter: true,
+                flex: 3,
+                tooltipField: 'body',
+                cellRenderer: params => {
+                    return params.value.substring(0, 100) + '...';
+                }
+            },
+            {
+                headerName: 'Actions',
+                width: 100,
+                cellRenderer: params => {
+                    return '<button class="btn btn-sm btn-dark">View</button>';
+                },
+                onCellClicked: params => {
+                    const id = params.data.id;
+                    currentPostIndex = posts.findIndex(post => post.id === id);
+                    displayCurrentPost();
+                    // Scroll to the post details
+                    document.getElementById('post-display').scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        ];
+          // Grid options
+        const gridOptions = {
+            columnDefs: columnDefs,
+            rowData: data,
+            pagination: true,
+            paginationPageSize: 5,
+            domLayout: 'normal',
+            defaultColDef: {
+                resizable: true,
+                suppressSizeToFit: false
+            },
+            rowSelection: 'single',
+            onRowClicked: params => {
+                const id = params.data.id;
+                currentPostIndex = posts.findIndex(post => post.id === id);
+                displayCurrentPost();
+            },
+            onGridSizeChanged: (params) => {
+                // Fit columns on resize
+                params.api.sizeColumnsToFit();
+            }
+        };
+        
+        // Get the grid div element 
+        const gridDiv = document.getElementById('ag-grid');
+        
+        // Clear any previous instance
+        gridDiv.innerHTML = '';        // Try to create an AG Grid, with fallback to Bootstrap table
+        try {
+            // Try different ways to initialize AG Grid based on version
+            if (typeof agGrid !== 'undefined') {
+                if (typeof agGrid.Grid === 'function') {
+                    new agGrid.Grid(gridDiv, gridOptions);
+                } else if (typeof agGrid.AgGrid === 'function') {
+                    new agGrid.AgGrid(gridDiv, gridOptions);
+                } else if (typeof agGrid.createGrid === 'function') {
+                    agGrid.createGrid(gridDiv, gridOptions);
+                } else {
+                    throw new Error("AG Grid API not found");
+                }
+            } else {
+                throw new Error("AG Grid not loaded");
+            }
+        } catch (error) {
+            console.error("AG Grid initialization failed:", error);
+            // Fall back to bootstrap table
+            createBootstrapTable(data);
+        }    }
+    
+    // Create a Bootstrap table as fallback when AG Grid fails
+    function createBootstrapTable(data) {
+        // Show the bootstrap table and hide the ag-grid
+        document.getElementById('ag-grid').style.display = 'none';
+        const bootstrapTable = document.getElementById('bootstrap-table');
+        bootstrapTable.style.display = 'block';
+        
+        const tableBody = document.getElementById('table-body');
+        tableBody.innerHTML = '';
+        
+        // Add rows to the table
+        data.forEach(post => {
+            const row = document.createElement('tr');
+            
+            const idCell = document.createElement('td');
+            idCell.textContent = post.id;
+            
+            const titleCell = document.createElement('td');
+            titleCell.textContent = post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title;
+            titleCell.title = post.title;
+            
+            const bodyCell = document.createElement('td');
+            bodyCell.textContent = post.body.length > 50 ? post.body.substring(0, 50) + '...' : post.body;
+            bodyCell.title = post.body;
+            
+            const actionCell = document.createElement('td');
+            const viewButton = document.createElement('button');
+            viewButton.className = 'btn btn-sm btn-dark';
+            viewButton.textContent = 'View';
+            viewButton.onclick = () => {
+                currentPostIndex = posts.findIndex(p => p.id === post.id);
+                displayCurrentPost();
+                document.getElementById('post-display').scrollIntoView({ behavior: 'smooth' });
+            };
+            actionCell.appendChild(viewButton);
+            
+            row.appendChild(idCell);
+            row.appendChild(titleCell);
+            row.appendChild(bodyCell);
+            row.appendChild(actionCell);
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Tell the user we're using the fallback
+        document.getElementById('api-status').textContent = `Loaded ${data.length} posts (using fallback table)`;
     }
 })();
