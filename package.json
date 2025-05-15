@@ -1,0 +1,39 @@
+{
+  "name": "simple-webview-extension",
+  "displayName": "Simple Webview Extension",
+  "version": "1.0.0",
+  "publisher": "user",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "simple-webview-extension.showWebView",
+        "title": "Show Simple Web UI"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "A simple VS Code extension with a web UI",
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "@types/vscode": "^1.100.0",
+    "typescript": "^5.8.3",
+    "vscode-test": "^1.6.1"
+  }
+}
