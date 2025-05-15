@@ -10,6 +10,11 @@
     let posts = [];
     let currentPostIndex = 0;
     
+    // Initialize form validation on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        initFormHandling();
+    });
+    
     // Counter functionality
     document.getElementById('increment').addEventListener('click', () => {
         count++;
@@ -234,7 +239,76 @@
             tableBody.appendChild(row);
         });
         
-        // Tell the user we're using the fallback
+    // Tell the user we're using the fallback
         document.getElementById('api-status').textContent = `Loaded ${data.length} posts (using fallback table)`;
+    }
+      // Initialize form validation and handling
+    function initFormHandling() {
+        const form = document.getElementById('demo-form');
+        
+        // Add event listener for form submission
+        if (form) {
+            form.addEventListener('submit', handleFormSubmit);
+            
+            // Add listeners for input validation feedback
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    if (input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                });
+            });
+        }
+    }
+    
+    // Handle form submission
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        
+        // Get form element
+        const form = event.target;
+        
+        // Check form validity using Bootstrap validation
+        if (!form.checkValidity()) {
+            event.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        // Collect form data
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            category: document.getElementById('category').value,
+            experience: document.querySelector('input[name="experience"]:checked')?.value || '',
+            subscribe: document.getElementById('subscribe').checked,
+            comments: document.getElementById('comments').value
+        };
+        
+        // Format the message for display
+        let message = `Form submitted successfully!\n\n`;
+        message += `Name: ${formData.name}\n`;
+        message += `Email: ${formData.email}\n`;
+        message += `Category: ${formData.category}\n`;
+        message += `Experience: ${formData.experience}\n`;
+        message += `Subscribe: ${formData.subscribe ? 'Yes' : 'No'}\n`;
+        if (formData.comments) {
+            message += `Comments: ${formData.comments}\n`;
+        }
+        
+        // Send message to VS Code extension to display as a notification
+        vscode.postMessage({
+            command: 'alert',
+            text: message
+        });
+        
+        // Reset form
+        form.classList.remove('was-validated');
+        form.reset();
     }
 })();
