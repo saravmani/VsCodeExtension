@@ -4,7 +4,7 @@
     const vscode = acquireVsCodeApi();
     
     // Initialize counter
-    let count = 200;
+    let count = 1;
     
     // Initialize posts array
     let posts = [];
